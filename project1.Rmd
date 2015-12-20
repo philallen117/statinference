@@ -1,0 +1,70 @@
+---
+title: "Exponentials Project"
+author: "Phil Allen"
+date: "19 December 2015"
+output: html_document
+---
+
+```{r, cache=TRUE, echo=FALSE}
+# Set the pseudo-random seed and the constants given in the question.
+set.seed(42)
+l=0.2
+SS=40
+nosim=1000
+```
+
+# Overview
+
+We investigate the exponential distribution in R and compare it with the Central Limit Theorem, simulating samples of `r SS` exponentials. 
+
+# Simulations
+
+We take $\lambda$ the rate to be `r l`, so that the population mean and standard deviation are both `r 1/l`. We investigate the distribution of averages of `r SS` exponentials, with `r nosim` trialss.
+
+Sample the exponential distribution into a matrix with `r nosim` rows and `r SS` columns. Apply mean across the columns of each row to obtain a vector of means `r SS` exponentials.
+
+```{r, cache=TRUE}
+obs <- matrix(rexp(SS*nosim,l), nosim) # nosim rows of SS observations
+sims <- apply(obs,1,mean)
+```
+# Results
+
+## Sample Mean versus Theoretical Mean
+
+The sample mean across the trials is `r round(mean(sims), 4)`, whereas the theoretical mean is `r 1/l`. It is interesting to see how the mean converges as the number of trials increases from 1 to 1000. Form the means of the subsequences of the observed means.
+
+```{r, cache=TRUE}
+means <- cumsum(sims)/(1:nosim)
+df <- data.frame(x=1:nosim, y=means)
+```
+
+In this case, there is marked divergence from the theortical mean (shown by horiztonal line) during the first 100 trials.
+
+```{r, echo=FALSE}
+library(ggplot2)
+g <- ggplot(df, aes(x = x, y = y)) + geom_line()
+g <- g + geom_hline(yintercept = 5, style)
+g <- g + labs(x = "Number of trials", y = "Mean", title = "Convergence to population mean")
+g
+```
+
+## Sample Variance versus Theoretical Variance
+
+Highlight the variances you are comparing. Include text that explains your understanding of the differences of the variances.
+The population variance of the average of 40 indepedent exp(0.2) variables is $\frac{5^2}{40}$, which is `r 5^2/40`. In this case, the sample variance is `r round(var(sims), 4)`
+
+
+```{r, cache=TRUE}
+var(sims)
+```
+
+
+## Distribution
+
+Via figures and text, explain how one can tell the distribution is approximately normal.
+
+```{r, eval=FALSE}
+g <- ggplot(dat, aes(x = x, fill = size)) + geom_histogram(binwidth=.3, colour = "black", aes(y = ..density..)) 
+g <- g + stat_function(fun = dnorm, size = 2)
+```
+
