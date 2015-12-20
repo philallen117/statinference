@@ -43,7 +43,7 @@ In this case, there is marked divergence from the theortical mean (shown by hori
 ```{r, echo=FALSE}
 library(ggplot2)
 g <- ggplot(df, aes(x = x, y = y)) + geom_line()
-g <- g + geom_hline(yintercept = 5, style)
+g <- g + geom_hline(yintercept = 5)
 g <- g + labs(x = "Number of trials", y = "Mean", title = "Convergence to population mean")
 g
 ```
@@ -56,15 +56,32 @@ The population variance of the average of 40 indepedent exp(0.2) variables is $\
 
 ```{r, cache=TRUE}
 var(sims)
+sampleMean <- mean(sims)
+cumsqerr <- cumsum((sims-sampleMean)^2)
+vars <- cumsqerr[2:nosim]/(1:(nosim-1))
+dfvars <- data.frame(x=(2:nosim), y=vars)
+```
+
+And plot it
+```{r, echo=FALSE}
+library(ggplot2)
+g <- ggplot(dfvars, aes(x = x, y = y)) + geom_line()
+g <- g + geom_hline(yintercept = 25/40)
+g <- g + labs(x = "Number of trials", y = "Variance", title = "Convergence to population variance")
+g
 ```
 
 
 ## Distribution
 
-Via figures and text, explain how one can tell the distribution is approximately normal.
-
-```{r, eval=FALSE}
-g <- ggplot(dat, aes(x = x, fill = size)) + geom_histogram(binwidth=.3, colour = "black", aes(y = ..density..)) 
-g <- g + stat_function(fun = dnorm, size = 2)
+We can tell the distribution is approximately normly by plotting a density histogram and superimposing the density function of the corresponding normal distribution $N(5,5 / \sqrt{40})$
+```{r}
+df3 <- data.frame(x=sims)
+dnormSims <- function (x) { dnorm(x, mean=5, sd=5/sqrt(40)) }
+```
+```{r, echo=FALSE}
+g <- ggplot(df3, aes(x = x)) + geom_histogram(binwidth=0.2, alpha=0.2, aes(y = ..density..)) 
+g <- g + stat_function(fun = dnormSims, size = 2)
+g
 ```
 
