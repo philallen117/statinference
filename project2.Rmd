@@ -7,16 +7,20 @@ output: html_document
 
 #Overview
 
-We analysed the ToothGrowth data set distributed with R, which reports experiments on the effect of vitamin C on tooth growth in guinea pigs.
+We analysed the ToothGrowth data set, which reports an experiment on the effect of vitamin C dosage and supplement type on tooth growth in guinea pigs.
 
 We found ...
 
 #Data
 
-C. I. Bliss (1952) The Statistics of Bioassay. Academic Press.
-Can be found using
+The data is taken from a study reported in 
+[_Crampton, E. W. (1947)_ The growth of the odontoblast of the incisor teeth as a criterion of vitamin C intake of the guinea pig. The Journal of Nutrition 33(5): 491–504](http://jn.nutrition.org/content/33/5/491.full.pdf)
 
-```{r, cache=TRUE}
+It studies the effect of vitamin C dosage and supplement type using guinea pigs, where tooth growth is taken as a measure of healthly development. This was of particular concern to the Canadian Government during the war years because of the difficulty of providing natural sources of vitamin C to the armed forces for a considerable portion of the year.
+
+The data can be found directly in R:
+
+```{r}
 library("datasets")
 ```
 
@@ -27,20 +31,42 @@ str(ToothGrowth)
 summary(ToothGrowth)
 ```
 
+There are `r dim(ToothGrowth)[1]` observations in a between groups experiment varying both the dose of Vitamin C (ascorbic acid) and the form in which the dose is added to the basal diet: as orange juice or directly as ascorbic acid.
 
+```{r,echo=FALSE}
+library("ggplot2")
+library("ggthemes")
+```
+
+```{r, echo=FALSE}
+# Growth (length) against dose, faceted by supplement type.
+# This function is for labelling the facets.
+flabel <- function(var, value){
+    value <- as.character(value)
+    if (var=="supp") { 
+        value[value=="OJ"] <- "Given Orange Juice"
+        value[value=="VC"]   <- "Given Ascorbic Acid"
+    }
+    return(value)
+}
+g <- ggplot(data=ToothGrowth, aes(x=dose, y=len)) + theme_economist()
+g <- g + geom_point()
+g <- g + expand_limits(x=0,y=0) + ylab("Length of ontoblasts (microns)") + xlab("Dose of Vitamin C (mg)")
+g <- g + stat_summary(geom = "line", fun.y = mean, size = 1, col = "black")
+g <- g + facet_grid(. ~ supp, labeller=flabel)
+g
+```
+
+
+#Analysis
+
+The following may be missing the point; should go with dosages first?
 ```{r,cache=TRUE}
 OJgroup <- ToothGrowth[ToothGrowth$supp == "OJ",]
 VCgroup <- ToothGrowth[ToothGrowth$supp == "VC",]
+t.test(len ~ I(relevel(supp, 2)), paired=TRUE, data=ToothGrowth)
 ```
 
-The following may be missing the point; should go with dosages first?
-
-```{r, echo=FALSE}
-summary(OJgroup)
-summary(VCgroup)
-```
-
-#Analysis
 
 #Conclusion
 
