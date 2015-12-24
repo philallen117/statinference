@@ -1,0 +1,46 @@
+---
+title: "Tooth Growth Study"
+author: "Phil Allen"
+date: "24 December 2015"
+output: html_document
+---
+
+#Overview
+
+We analysed the ToothGrowth data set distributed with R, which reports experiments on the effect of vitamin C on tooth growth in guinea pigs.
+
+We found ...
+
+#Data
+
+C. I. Bliss (1952) The Statistics of Bioassay. Academic Press.
+Can be found using
+
+```{r, cache=TRUE}
+library("datasets")
+```
+
+So let's have a look
+
+```{r}
+str(ToothGrowth)
+summary(ToothGrowth)
+```
+
+
+```{r,cache=TRUE}
+OJgroup <- ToothGrowth[ToothGrowth$supp == "OJ",]
+VCgroup <- ToothGrowth[ToothGrowth$supp == "VC",]
+```
+
+The following may be missing the point; should go with dosages first?
+
+```{r, echo=FALSE}
+summary(OJgroup)
+summary(VCgroup)
+```
+
+#Analysis
+
+#Conclusion
+
