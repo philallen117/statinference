@@ -1,5 +1,5 @@
 ---
-title: "Tooth Growth Study"
+title: "Statistical Inference: Tooth Growth Study"
 author: "Phil Allen"
 date: "24 December 2015"
 output: html_document
@@ -7,13 +7,13 @@ output: html_document
 
 #Overview
 
-We analysed the ToothGrowth data set, which reports an experiment on the effect of vitamin C dosage and supplement type on tooth growth in guinea pigs.
+We analysed the ToothGrowth data set, which reports an experiment on the effect of vitamin C dosage and supplement type on tooth growth in guinea pigs. This was a simple animal model, motivated by the need to understand health effects in humans, specifically Canadian forces personnel who could not always be supplied with a naturally balanced diet.
 
-We found ...
+We found weak evidence suggesting that the supplement type makes a difference to the tooth growth of guinea pigs.
 
 #Data
 
-The data is taken from a study reported in 
+The data is taken from an experiment reported in 
 [_Crampton, E. W. (1947)_ The growth of the odontoblast of the incisor teeth as a criterion of vitamin C intake of the guinea pig. The Journal of Nutrition 33(5): 491–504](http://jn.nutrition.org/content/33/5/491.full.pdf)
 
 It studies the effect of vitamin C dosage and supplement type using guinea pigs, where tooth growth is taken as a measure of healthly development. This was of particular concern to the Canadian Government during the war years because of the difficulty of providing natural sources of vitamin C to the armed forces for a considerable portion of the year.
@@ -31,15 +31,11 @@ str(ToothGrowth)
 summary(ToothGrowth)
 ```
 
-There are `r dim(ToothGrowth)[1]` observations in a between groups experiment varying both the dose of Vitamin C (ascorbic acid) and the form in which the dose is added to the basal diet: as orange juice or directly as ascorbic acid.
+There are `r dim(ToothGrowth)[1]` observations in a between groups experiment, varying both the dose of vitamin C (ascorbic acid) and the form in which the supplement is added to the basal diet: as orange juice or directly as vitamin C.
 
 ```{r,echo=FALSE}
 library("ggplot2")
 library("ggthemes")
-```
-
-```{r, echo=FALSE}
-# Growth (length) against dose, faceted by supplement type.
 # This function is for labelling the facets.
 flabel <- function(var, value){
     value <- as.character(value)
@@ -49,24 +45,66 @@ flabel <- function(var, value){
     }
     return(value)
 }
-g <- ggplot(data=ToothGrowth, aes(x=dose, y=len)) + theme_economist()
+```
+
+Now, consider the distribution of growth achieved.
+
+```{r, echo=FALSE}
+# Density histogram, faceted by supplement type.
+p <- ggplot(data=ToothGrowth, aes(x=len))
+p <- p + geom_histogram(aes(y=..density..), binwidth = 2.5)
+p <- p + facet_grid(. ~ supp)
+p <- p + ggtitle("60 observations of tooth growth") + 
+  ylab("Density") + 
+  xlab("Length of ontoblasts (microns)") +
+  theme_economist()
+p
+```
+
+Viewing a density histogram of growth achieved, faceted by supplement type, we see that the distributions are not Gaussian. However, they are "roughly symmetric and mound-shaped".
+
+Further, we can explore the relationship between dose and growth achieved, once more faceting by supplement type.
+
+```{r, echo=FALSE}
+# Growth (length) against dose, faceted by supplement type.
+g <- ggplot(data=ToothGrowth, aes(x=dose, y=len))
 g <- g + geom_point()
-g <- g + expand_limits(x=0,y=0) + ylab("Length of ontoblasts (microns)") + xlab("Dose of Vitamin C (mg)")
-g <- g + stat_summary(geom = "line", fun.y = mean, size = 1, col = "black")
-g <- g + facet_grid(. ~ supp, labeller=flabel)
+g <- g + stat_summary(geom = "line", fun.y = mean, size = 1, col = "red")
+g <- g + expand_limits(x=0,y=0) + 
+  ylab("Length of ontoblasts (microns)") + 
+  xlab("Dose of Vitamin C (mg)") +
+  ggtitle("Growth versus dosage of vitamin C, faceted by supplement type") +
+  theme_economist()
+g <- g + facet_grid(. ~ supp)
 g
 ```
 
+This plot is suggestive of a relationship between growth and dosage: the means for each dose are shown linked by a red line.
 
 #Analysis
 
-The following may be missing the point; should go with dosages first?
+The plots above suggest a possible relationship between growth and the form of the supplement. We assume that the distribution of the data is sufficiently symmetric and mound-shaped to justify using a t-test. The design of the experiment (between groups) suggests we should use an independent groups test.
+
+```{r,cache=TRUE,echo=FALSE}
+ci <- function(ttout) { 
+  i <- round(as.vector(ttout$conf.int), 2)
+  paste0("(", i[1], ", ", i[2], ")")
+}
+ttig95 <- t.test(len ~ I(relevel(supp, 2)), paired=FALSE, data=ToothGrowth)
+ttig90 <- t.test(len ~ I(relevel(supp, 2)), paired=FALSE, data=ToothGrowth, conf.level=0.9)
+ttig95
+```
+
+There is weak evidence to reject the hull hypothesis that the form of supplement makes no difference to growth, with p = `r round(100*ttig95$p.value,3)`%. The 95% confidence interval for the difference of the means (Vitamin C minus Orange Juice) not containing zero: `r ci(ttig95)`. However, the 90% confidence interval _does_ include zero: `r ci(ttig90)`.
+
+Suppose instead that we treat the data as paired.
 ```{r,cache=TRUE}
-OJgroup <- ToothGrowth[ToothGrowth$supp == "OJ",]
-VCgroup <- ToothGrowth[ToothGrowth$supp == "VC",]
 t.test(len ~ I(relevel(supp, 2)), paired=TRUE, data=ToothGrowth)
 ```
 
+There is evidence to reject the null hypothesis of no effect between the treatments, since the confidence interval does not include zero. However, the assumption of pairing cannot be justified. 
 
 #Conclusion
+
+Under assumption that the t-test is valid, we found weak evidence to support rejecting the null hypothesis that the form of vitamin C supplement (orange juice versus direct) makes no difference to the tooth growth of the subjects. Taking tooth development as one measure of health, this suggests that the health effects of taking vitamin C in different forms could also differ in humans, and merit further study.
 

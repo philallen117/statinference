@@ -1,87 +1,81 @@
 ---
-title: "Exponentials Project"
+title: 'Statistical inference: exponentials simulation'
 author: "Phil Allen"
-date: "19 December 2015"
+date: "24 December 2015"
 output: html_document
 ---
+```{r, echo=FALSE}
+library("ggplot2")
+library("ggthemes")
+```
 
-```{r, cache=TRUE, echo=FALSE}
-# Set the pseudo-random seed and the constants given in the question.
+# Overview
+
+We investigate the exponential distribution in R. By simulation, we compare the mean of independent identically variables with the asymptotic result given Central Limit Theorem.
+
+We find that that Central Limit Theorem predicts the variance and distribution of the means fairly well.
+
+# Simulations
+
+```{r, cache=TRUE}
+# Set the pseudo-random seed and name the constants given in the question.
 set.seed(42)
 l=0.2
 SS=40
 nosim=1000
 ```
 
-# Overview
+We use a rate $\lambda = 0.2$ so that the population mean and standard deviation are both `r 1/l`. We investigate the distribution of averages of `r SS` exponentials, with `r nosim` trials.
 
-We investigate the exponential distribution in R and compare it with the Central Limit Theorem, simulating samples of `r SS` exponentials. 
-
-# Simulations
-
-We take $\lambda$ the rate to be `r l`, so that the population mean and standard deviation are both `r 1/l`. We investigate the distribution of averages of `r SS` exponentials, with `r nosim` trialss.
-
-Sample the exponential distribution into a matrix with `r nosim` rows and `r SS` columns. Apply mean across the columns of each row to obtain a vector of means `r SS` exponentials.
+We first sample the exponential distribution into a matrix with `r nosim` rows and `r SS` columns. Then apply mean across the columns of each row to obtain a vector of means of `r SS` exponentials of length `r nosim`.
 
 ```{r, cache=TRUE}
 obs <- matrix(rexp(SS*nosim,l), nosim) # nosim rows of SS observations
 sims <- apply(obs,1,mean)
 ```
+
 # Results
 
 ## Sample Mean versus Theoretical Mean
 
-The sample mean across the trials is `r round(mean(sims), 4)`, whereas the theoretical mean is `r 1/l`. It is interesting to see how the mean converges as the number of trials increases from 1 to 1000. Form the means of the subsequences of the observed means.
+The sample mean across the simulation trials is `r round(mean(sims), 4)`, whereas the theoretical mean is `r 1/l`. It is interesting to see how the mean converges as the number of trials increases from 1 to 1000. Form the means of the subsequences of the observed means.
 
 ```{r, cache=TRUE}
 means <- cumsum(sims)/(1:nosim)
 df <- data.frame(x=1:nosim, y=means)
 ```
 
-In this case, there is marked divergence from the theortical mean (shown by horiztonal line) during the first 100 trials.
+In this case, there is marked divergence from the theortical mean (shown by red horiztonal line) during the first 100 trials.
 
 ```{r, echo=FALSE}
-library(ggplot2)
-g <- ggplot(df, aes(x = x, y = y)) + geom_line()
-g <- g + geom_hline(yintercept = 5)
-g <- g + labs(x = "Number of trials", y = "Mean", title = "Convergence to population mean")
+g <- ggplot(df, aes(x = x, y = y)) + theme_economist() + geom_line()
+g <- g + geom_hline(yintercept = 5, col="red")
+g <- g + xlab("Number of trials") +
+  ylab("Mean") +
+  ggtitle("Convergence to population mean") +
+  theme_economist()
 g
 ```
 
 ## Sample Variance versus Theoretical Variance
 
-Highlight the variances you are comparing. Include text that explains your understanding of the differences of the variances.
-The population variance of the average of 40 indepedent exp(0.2) variables is $\frac{5^2}{40}$, which is `r 5^2/40`. In this case, the sample variance is `r round(var(sims), 4)`
-
-
-```{r, cache=TRUE}
-var(sims)
-sampleMean <- mean(sims)
-cumsqerr <- cumsum((sims-sampleMean)^2)
-vars <- cumsqerr[2:nosim]/(1:(nosim-1))
-dfvars <- data.frame(x=(2:nosim), y=vars)
-```
-
-And plot it
-```{r, echo=FALSE}
-library(ggplot2)
-g <- ggplot(dfvars, aes(x = x, y = y)) + geom_line()
-g <- g + geom_hline(yintercept = 25/40)
-g <- g + labs(x = "Number of trials", y = "Variance", title = "Convergence to population variance")
-g
-```
-
+Applying the formula given in the lectures, the _population_ variance of the average of 40 independent $exp(0.2)$ variables is $\frac{(1/0.2)^2}{40}$, which is `r 5^2/40`. In this simulation, the sample variance across the trials is `r round(var(sims), 3)`.
 
 ## Distribution
 
-We can tell the distribution is approximately normly by plotting a density histogram and superimposing the density function of the corresponding normal distribution $N(5,5 / \sqrt{40})$
-```{r}
+We can demonstrate that the distribution of the means is approximately normal by plotting a density histogram of the simulation data, and superimposing the density function of the corresponding normal distribution, $N(5,5 / \sqrt{40})$, as shown by the thick black line.
+
+```{r, echo=FALSE}
 df3 <- data.frame(x=sims)
 dnormSims <- function (x) { dnorm(x, mean=5, sd=5/sqrt(40)) }
-```
-```{r, echo=FALSE}
-g <- ggplot(df3, aes(x = x)) + geom_histogram(binwidth=0.2, alpha=0.2, aes(y = ..density..)) 
+g <- ggplot(df3, aes(x = x))
+g <- g + geom_histogram(binwidth=0.2, alpha=0.2, aes(y = ..density..)) 
 g <- g + stat_function(fun = dnormSims, size = 2)
+g <- g + theme_economist() + 
+  xlab("Value of mean") +
+  ylab("Density") +
+  ggtitle(paste0(nosim, " means of ", SS, " simulated independent variables"))
 g
 ```
 
+However, there is some remaining left skew, reflecting the density function of a single exponential variable, which is ${\lambda}e^{-{\lambda}x}$ for $x\ge{0}$.
