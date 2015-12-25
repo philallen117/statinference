@@ -33,7 +33,6 @@ Here is some basic information about the data set.
 
 ```{r}
 str(ToothGrowth)
-summary(ToothGrowth)
 ```
 
 There are `r dim(ToothGrowth)[1]` observations in a _between groups_ experiment, varying both the dose of vitamin C (ascorbic acid) and the form in which the supplement is added to the basal diet: as orange juice or directly as vitamin C.
@@ -46,7 +45,7 @@ levels(ToothGrowth$supp) <- c("Orange juice", "Vitamin C")
 
 Now, consider the distribution of growth achieved.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height=4}
 # Density histogram, faceted by supplement type.
 p <- ggplot(data=ToothGrowth, aes(x=len))
 p <- p + geom_histogram(aes(y=..density..), binwidth = 2.5)
@@ -62,7 +61,7 @@ Viewing a density histogram of growth achieved, faceted by supplement type, we s
 
 Further, we can explore the relationship between dose and growth achieved, once more faceting by supplement type.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height=4}
 # Growth (length) against dose, faceted by supplement type.
 g <- ggplot(data=ToothGrowth, aes(x=dose, y=len))
 g <- g + geom_point()
