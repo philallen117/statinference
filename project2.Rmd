@@ -1,7 +1,7 @@
 ---
 title: "Statistical Inference: Tooth Growth Study"
 author: "Phil Allen"
-date: "24 December 2015"
+date: "25 December 2015"
 output: html_document
 ---
 
@@ -24,27 +24,19 @@ The data can be found directly in R:
 library("datasets")
 ```
 
-So let's have a look
+Here is some basic information about the data set.
 
 ```{r}
 str(ToothGrowth)
 summary(ToothGrowth)
 ```
 
-There are `r dim(ToothGrowth)[1]` observations in a between groups experiment, varying both the dose of vitamin C (ascorbic acid) and the form in which the supplement is added to the basal diet: as orange juice or directly as vitamin C.
+There are `r dim(ToothGrowth)[1]` observations in a _between groups_ experiment, varying both the dose of vitamin C (ascorbic acid) and the form in which the supplement is added to the basal diet: as orange juice or directly as vitamin C.
 
 ```{r,echo=FALSE}
 library("ggplot2")
 library("ggthemes")
-# This function is for labelling the facets.
-flabel <- function(var, value){
-    value <- as.character(value)
-    if (var=="supp") { 
-        value[value=="OJ"] <- "Given Orange Juice"
-        value[value=="VC"]   <- "Given Ascorbic Acid"
-    }
-    return(value)
-}
+levels(ToothGrowth$supp) <- c("Orange juice", "Vitamin C")
 ```
 
 Now, consider the distribution of growth achieved.

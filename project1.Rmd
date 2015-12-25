@@ -1,7 +1,7 @@
 ---
 title: 'Statistical inference: exponentials simulation'
 author: "Phil Allen"
-date: "24 December 2015"
+date: "25 December 2015"
 output: html_document
 ---
 ```{r, echo=FALSE}
@@ -11,7 +11,7 @@ library("ggthemes")
 
 # Overview
 
-We investigate the exponential distribution in R. By simulation, we compare the mean of independent identically variables with the asymptotic result given Central Limit Theorem.
+We investigate the exponential distribution in R. By simulation, we compare the mean of independent identically variables with the asymptotic result given by the Central Limit Theorem.
 
 We find that that Central Limit Theorem predicts the variance and distribution of the means fairly well.
 
@@ -38,16 +38,13 @@ sims <- apply(obs,1,mean)
 
 ## Sample Mean versus Theoretical Mean
 
-The sample mean across the simulation trials is `r round(mean(sims), 4)`, whereas the theoretical mean is `r 1/l`. It is interesting to see how the mean converges as the number of trials increases from 1 to 1000. Form the means of the subsequences of the observed means.
+The sample mean across the simulation trials is `r round(mean(sims), 4)`, whereas the population mean is `r 1/l`. It is interesting to see how the sample mean converges to the population mean as the number of trials increases from 1 to 1000.
 
-```{r, cache=TRUE}
-means <- cumsum(sims)/(1:nosim)
-df <- data.frame(x=1:nosim, y=means)
-```
-
-In this case, there is marked divergence from the theortical mean (shown by red horiztonal line) during the first 100 trials.
+To demonstrate this, take cumulative means of the subsequences of the sequence of simulations: first value; mean of first and second value: mean of first, second and third value, and so on. The length of subsequence, which is the number of trials, is plotted on the x-axis in the following plot.
 
 ```{r, echo=FALSE}
+means <- cumsum(sims)/(1:nosim)
+df <- data.frame(x=1:nosim, y=means)
 g <- ggplot(df, aes(x = x, y = y)) + theme_economist() + geom_line()
 g <- g + geom_hline(yintercept = 5, col="red")
 g <- g + xlab("Number of trials") +
@@ -56,6 +53,8 @@ g <- g + xlab("Number of trials") +
   theme_economist()
 g
 ```
+
+In this case, there is marked divergence from the theortical mean (shown by red horiztonal line) during the first 100 trials.
 
 ## Sample Variance versus Theoretical Variance
 
