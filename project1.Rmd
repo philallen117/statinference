@@ -2,7 +2,12 @@
 title: 'Statistical inference: exponentials simulation'
 author: "Phil Allen"
 date: "25 December 2015"
-output: html_document
+output:
+  pdf_document:
+    highlight: zenburn
+    keep_tex: yes
+  html_document:
+    theme: united
 ---
 ```{r, echo=FALSE}
 library("ggplot2")

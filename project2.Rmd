@@ -1,8 +1,13 @@
 ---
-title: "Statistical Inference: Tooth Growth Study"
+title: 'Statistical Inference: Tooth Growth Study'
 author: "Phil Allen"
 date: "25 December 2015"
-output: html_document
+output:
+  pdf_document:
+    highlight: zenburn
+    keep_tex: yes
+  html_document:
+    theme: united
 ---
 
 #Overview
@@ -87,7 +92,7 @@ ttig90 <- t.test(len ~ I(relevel(supp, 2)), paired=FALSE, data=ToothGrowth, conf
 ttig95
 ```
 
-There is weak evidence to reject the hull hypothesis that the form of supplement makes no difference to growth, with p = `r round(100*ttig95$p.value,3)`%. The 95% confidence interval for the difference of the means (Vitamin C minus Orange Juice) not containing zero: `r ci(ttig95)`. However, the 90% confidence interval _does_ include zero: `r ci(ttig90)`.
+There is weak evidence to reject the hull hypothesis that the form of supplement makes no difference to growth, with p = `r round(100*ttig95$p.value,3)`%. The 95% confidence interval for the difference of the means (Vitamin C minus Orange Juice) does not contain zero: `r ci(ttig95)`. However, the 90% confidence interval _does_ include zero: `r ci(ttig90)`.
 
 Suppose instead that we treat the data as paired.
 ```{r,cache=TRUE}
@@ -98,5 +103,5 @@ There is evidence to reject the null hypothesis of no effect between the treatme
 
 #Conclusion
 
-Under assumption that the t-test is valid, we found weak evidence to support rejecting the null hypothesis that the form of vitamin C supplement (orange juice versus direct) makes no difference to the tooth growth of the subjects. Taking tooth development as one measure of health, this suggests that the health effects of taking vitamin C in different forms could also differ in humans, and merit further study.
+Under the assumption that the distribution of the data means a t-test is valid, we found weak evidence to support rejecting the null hypothesis that the form of vitamin C supplement (orange juice versus direct) makes no difference to the tooth growth of the subjects. Taking tooth development as one measure of health, this suggests that the health effects of taking vitamin C in different forms could also differ in humans, and merit further study.
 
