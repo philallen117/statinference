@@ -72,3 +72,4 @@ $RECYCLE.BIN/
 # knitr intermediate files
 *_files/*
 *_cache/*
+*.tex
